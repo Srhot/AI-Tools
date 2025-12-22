@@ -1,0 +1,153 @@
+{
+  "backup_info": {
+    "backup_date": "2025-12-22",
+    "original_system": "Windows 11",
+    "total_size_mb": 231,
+    "notebooks_count": 1
+  },
+  "notebooks": [
+    {
+      "id": "suolingo-ai-avatar-language-le",
+      "url": "https://notebooklm.google.com/notebook/2df7e473-f783-43d5-a2df-5b1a50b8a99f",
+      "name": "Suolingo - AI Avatar Language Learning",
+      "description": "SOULINGO AI Avatar destekli yabancı dil öğrenme uygulaması. React Native, Expo, Deepgram, ElevenLabs, Gemini AI entegrasyonları ve 12 interaktif öğrenme modu içerir.",
+      "topics": [
+        "React Native",
+        "Language Learning",
+        "AI Avatar",
+        "Speech Recognition",
+        "Text-to-Speech"
+      ],
+      "content_types": [
+        "documentation",
+        "API integration guides",
+        "feature specifications"
+      ],
+      "use_cases": [
+        "When implementing learning modes",
+        "When integrating APIs (Deepgram, ElevenLabs, Gemini)",
+        "When working on avatar lip-sync"
+      ],
+      "tags": [
+        "suolingo",
+        "language-learning",
+        "ai-avatar"
+      ],
+      "added_at": "2025-12-09T08:18:19.217Z",
+      "last_used": "2025-12-18T21:43:47.577Z",
+      "use_count": 4
+    }
+  ],
+  "installation_paths": {
+    "windows": {
+      "local": "C:\\Users\\[USERNAME]\\AppData\\Local\\notebooklm-mcp",
+      "roaming": "C:\\Users\\[USERNAME]\\AppData\\Roaming\\notebooklm-mcp"
+    },
+    "macos": {
+      "app_support": "~/Library/Application Support/notebooklm-mcp"
+    },
+    "linux": {
+      "config": "~/.config/notebooklm-mcp"
+    }
+  },
+  "critical_files": [
+    {
+      "file": "library.json",
+      "location": "Roaming/",
+      "importance": "CRITICAL",
+      "description": "Contains all notebook connections and metadata"
+    },
+    {
+      "file": "browser_state/",
+      "location": "Local/Data/",
+      "importance": "HIGH",
+      "description": "Google authentication cookies and session data"
+    },
+    {
+      "file": "chrome_profile/",
+      "location": "Local/Data/",
+      "importance": "MEDIUM",
+      "description": "Browser profile settings and cached data"
+    }
+  ],
+  "restore_commands": {
+    "windows_powershell": [
+      "Copy-Item -Path 'Desktop\\AI Tools\\NotebookLM-MCP\\Local\\*' -Destination \"$env:LOCALAPPDATA\\notebooklm-mcp\\\" -Recurse -Force",
+      "Copy-Item -Path 'Desktop\\AI Tools\\NotebookLM-MCP\\Roaming\\*' -Destination \"$env:APPDATA\\notebooklm-mcp\\\" -Recurse -Force"
+    ],
+    "macos_bash": [
+      "cp -R 'Desktop/AI Tools/NotebookLM-MCP/Local/'* \"$HOME/Library/Application Support/notebooklm-mcp/\"",
+      "cp -R 'Desktop/AI Tools/NotebookLM-MCP/Roaming/'* \"$HOME/Library/Application Support/notebooklm-mcp/\""
+    ],
+    "linux_bash": [
+      "cp -R 'Desktop/AI Tools/NotebookLM-MCP/Local/'* \"$HOME/.config/notebooklm-mcp/\"",
+      "cp -R 'Desktop/AI Tools/NotebookLM-MCP/Roaming/'* \"$HOME/.config/notebooklm-mcp/\""
+    ]
+  },
+  "mcp_settings_example": {
+    "mcpServers": {
+      "notebooklm-fixed": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@notebooklm/mcp@latest"
+        ],
+        "env": {
+          "NOTEBOOKLM_BROWSER_SHOW": "false",
+          "NOTEBOOKLM_BROWSER_HEADLESS": "true"
+        },
+        "disabled": false
+      }
+    }
+  },
+  "verification_steps": [
+    "Check MCP server health: 'Check NotebookLM-MCP health status'",
+    "List notebooks: 'List all NotebookLM notebooks'",
+    "Test query: 'Ask NotebookLM: What are the main features of Suolingo app?'"
+  ],
+  "troubleshooting": {
+    "common_issues": [
+      {
+        "issue": "authenticated: false",
+        "solution": "Run 'Setup NotebookLM authentication' in Claude Code"
+      },
+      {
+        "issue": "Notebooks not showing",
+        "solution": "Check if library.json exists in Roaming folder, or manually add notebooks"
+      },
+      {
+        "issue": "MCP Server not found",
+        "solution": "Verify mcp_settings.json syntax and restart Claude Code"
+      },
+      {
+        "issue": "Browser/Chrome errors",
+        "solution": "Close all Chrome instances and run cleanup: 'Cleanup NotebookLM data but preserve library'"
+      },
+      {
+        "issue": "Rate limit exceeded",
+        "solution": "Switch Google account or upgrade to Google AI Premium (5x higher limit)"
+      }
+    ]
+  },
+  "requirements": {
+    "software": [
+      "Node.js 18.0 or higher",
+      "npm (comes with Node.js)",
+      "Claude Code CLI",
+      "Git (for GitHub clone)",
+      "Google account (for NotebookLM access)"
+    ],
+    "system": [
+      "Windows 10/11, macOS 10.15+, or Linux",
+      "At least 500 MB free disk space",
+      "Internet connection"
+    ]
+  },
+  "important_notes": [
+    "Close ALL Chrome/Chromium windows before copying files",
+    "library.json is the MOST CRITICAL file - back it up separately",
+    "Use the same Google account for authentication",
+    "Free account has 50 queries/day limit",
+    "Authentication data is sensitive - store securely"
+  ]
+}
