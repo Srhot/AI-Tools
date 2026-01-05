@@ -37,7 +37,7 @@
 ## ✅ Gemini - WORKING (FIXED!)
 
 **Model:** `gemini-2.0-flash`
-**API Key:** `AIzaSyAHbjQLuc3CMiJ9xo302x-aqeFcqzSmh68`
+**API Key:** `YOUR API KEY'
 **Test Response:** "Hello from Gemini 2.0 Flash via DevForge!"
 
 ### What Was The Problem?
@@ -61,7 +61,7 @@ Google now has **Gemini 2.0** and **Gemini 2.5** models:
 ```json
 {
   "AI_PROVIDER": "gemini",
-  "AI_API_KEY": "AIzaSyAHbjQLuc3CMiJ9xo302x-aqeFcqzSmh68",
+  "AI_API_KEY": "YOUR API KEY ",
   "AI_MODEL": "gemini-2.0-flash"
 }
 ```
@@ -118,7 +118,7 @@ constructor(apiKey: string, modelName: string = 'gemini-2.0-flash') {
   "devforge-gemini": {
     "env": {
       "AI_PROVIDER": "gemini",
-      "AI_API_KEY": "AIzaSyAHbjQLuc3CMiJ9xo302x-aqeFcqzSmh68",  // New key
+      "AI_API_KEY": "`YOUR API KEY'",  // New key
       "AI_MODEL": "gemini-2.0-flash"  // New model
     }
   }
@@ -188,7 +188,7 @@ Your `claude_desktop_config.json` now has:
       "args": ["C:\\Users\\serha\\OneDrive\\Desktop\\devforge-mcp-server\\build\\index.js"],
       "env": {
         "AI_PROVIDER": "gemini",
-        "AI_API_KEY": "AIzaSyAHbjQLuc3CMiJ9xo302x-aqeFcqzSmh68",
+        "AI_API_KEY": "`YOUR API KEY'",
         "AI_MODEL": "gemini-2.0-flash"
       }
     }
