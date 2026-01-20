@@ -1,11 +1,11 @@
 {
   "name": "devforge-mcp-server",
-  "version": "2.0.0",
-  "description": "DevForge - AI Software Factory MCP Server",
+  "version": "3.0.0",
+  "description": "DevForge - AI Software Factory MCP Server with NotebookLM and A2UI Integration",
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node build/index.js"
   },

@@ -22,14 +22,24 @@ import {
 import { AdapterFactory, AIProvider } from './adapters/adapter-factory.js';
 import { MasterOrchestrator } from './modules/master-orchestrator.js';
 import { WorkflowState } from './modules/master-orchestrator.js';
+import { NotebookLMClient, getNotebookLMClient } from './integrations/notebooklm-client.js';
+import { A2UIGenerator, getA2UIGenerator, A2UIPlatform, UIScreen } from './generators/a2ui-generator.js';
 
 // AI Provider Configuration
-const aiProvider = (process.env.AI_PROVIDER || 'claude') as AIProvider;
-const aiApiKey = process.env.AI_API_KEY || process.env.ANTHROPIC_API_KEY || '';
+const aiProvider = (process.env.AI_PROVIDER || 'gemini') as AIProvider;
+
+// API Key Priority: Gemini → Anthropic → OpenAI
+const aiApiKey = process.env.GEMINI_API_KEY ||
+  process.env.AI_API_KEY ||
+  process.env.ANTHROPIC_API_KEY ||
+  process.env.OPENAI_API_KEY ||
+  '';
+
 const aiModel = process.env.AI_MODEL;
 
 if (!aiApiKey) {
-  console.error('❌ Error: AI_API_KEY or ANTHROPIC_API_KEY not provided');
+  console.error('❌ Error: No API key provided');
+  console.error('Please set one of: GEMINI_API_KEY, ANTHROPIC_API_KEY, or OPENAI_API_KEY');
   process.exit(1);
 }
 
@@ -43,10 +53,19 @@ const aiAdapter = AdapterFactory.createAdapter({
 // Create Master Orchestrator
 const masterOrchestrator = new MasterOrchestrator(aiAdapter);
 
-console.log(`🤖 DevForge MCP Server - Complete AI Software Factory`);
+// NotebookLM Integration
+const notebookLMEnabled = process.env.NOTEBOOKLM_ENABLED === 'true';
+const notebookLMClient = getNotebookLMClient({ enabled: notebookLMEnabled });
+
+// A2UI Generator
+const a2uiGenerator = getA2UIGenerator();
+
+console.log(`🤖 DevForge MCP Server v3.0 - Complete AI Software Factory`);
 console.log(`📡 AI Provider: ${aiProvider}`);
 console.log(`🎯 Model: ${aiModel || AdapterFactory.getDefaultModel(aiProvider)}`);
-console.log(`✨ Features: Decision Matrix, Spec-Kit, POML, API Testing, BDD, Context Preservation`);
+console.log(`📚 NotebookLM: ${notebookLMEnabled ? 'Enabled' : 'Disabled'}`);
+console.log(`🎨 A2UI: Enabled (React, Flutter, React Native, Web, Angular, Console)`);
+console.log(`✨ Features: Decision Matrix, Spec-Kit, POML, API Testing, BDD, Context Preservation, A2UI`);
 
 // DevForge Server - Complete Workflow Manager
 class DevForgeServer {
@@ -99,6 +118,10 @@ class DevForgeServer {
             return await this.getWorkflowStatus(args);
           case "complete_task":
             return await this.completeTask(args);
+          case "check_knowledge_base":
+            return await this.checkKnowledgeBase(args);
+          case "generate_ui_blueprint":
+            return await this.generateUIBlueprint(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -291,6 +314,64 @@ class DevForgeServer {
           required: ["project_name", "task_id"],
         },
       },
+      {
+        name: "check_knowledge_base",
+        description: "Check if NotebookLM has relevant documentation for the project. If found, uses grounded, citation-backed context for spec generation. If not found, falls back to AI generation.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_name: {
+              type: "string",
+              description: "Name of the project to search for",
+            },
+            project_description: {
+              type: "string",
+              description: "Description of what the project does",
+            },
+            keywords: {
+              type: "array",
+              items: { type: "string" },
+              description: "Optional keywords to search for in NotebookLM",
+            },
+          },
+          required: ["project_name", "project_description"],
+        },
+      },
+      {
+        name: "generate_ui_blueprint",
+        description: "Generate A2UI (Agent-to-UI) JSON blueprint for cross-platform UI. Supports React, Flutter, React Native, Web, Angular, and Console. Returns declarative UI definition that can be rendered by any supported framework.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            project_name: {
+              type: "string",
+              description: "Name of the project",
+            },
+            platform: {
+              type: "string",
+              enum: ["react", "flutter", "react-native", "web", "angular", "console"],
+              description: "Target platform for UI generation",
+            },
+            screens: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  route: { type: "string" },
+                  description: { type: "string" },
+                  components: {
+                    type: "array",
+                    items: { type: "string" },
+                  },
+                },
+              },
+              description: "List of screens to generate",
+            },
+          },
+          required: ["project_name", "platform", "screens"],
+        },
+      },
     ];
   }
 
@@ -338,7 +419,7 @@ Type: ${project_type}
 📋 Decision Matrix Questions (${result.decisionMatrix.questions.length} questions):
 
 ${result.decisionMatrix.questions.map((q: any, i: number) =>
-  `${i + 1}. [${q.category.toUpperCase()}] ${q.question}
+            `${i + 1}. [${q.category.toUpperCase()}] ${q.question}
    Type: ${q.type}
    ${q.options ? `Options: ${q.options.join(', ')}` : ''}
 `).join('\n')}
@@ -413,11 +494,11 @@ ${result.files.map(f => `  ✓ ${f}`).join('\n')}
 
 📋 Task Categories:
 ${Object.entries(
-  result.specKit.tasks.reduce((acc: any, task: any) => {
-    acc[task.type] = (acc[task.type] || 0) + 1;
-    return acc;
-  }, {})
-).map(([type, count]) => `  • ${type}: ${count} tasks`).join('\n')}
+            result.specKit.tasks.reduce((acc: any, task: any) => {
+              acc[task.type] = (acc[task.type] || 0) + 1;
+              return acc;
+            }, {})
+          ).map(([type, count]) => `  • ${type}: ${count} tasks`).join('\n')}
 
 💾 Context Preservation:
   • POML file created: PROJECT.poml
@@ -817,10 +898,174 @@ ${tasksSinceCheckpoint >= 15 ? '⚠️  Checkpoint recommended soon (20 tasks tr
     };
   }
 
+  /**
+   * Check NotebookLM knowledge base for project context
+   */
+  private async checkKnowledgeBase(args: any) {
+    const { project_name, project_description, keywords = [] } = args;
+
+    console.log(`\n📚 Checking knowledge base for "${project_name}"`);
+
+    // Check if NotebookLM is enabled
+    if (!notebookLMClient.isAvailable()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📚 NotebookLM Integration Status
+
+⚠️  NotebookLM is not enabled or connected.
+
+To enable NotebookLM:
+1. Set NOTEBOOKLM_ENABLED=true in your environment
+2. Ensure notebooklm-mcp server is running
+
+🔄 Fallback Mode Active:
+DevForge will use ${aiProvider} (${aiModel || AdapterFactory.getDefaultModel(aiProvider)}) for context generation.
+
+Would you like to proceed with AI-generated specs instead?`,
+          },
+        ],
+      };
+    }
+
+    // Query NotebookLM for project context
+    const result = await notebookLMClient.checkForProjectContext(
+      project_name,
+      project_description
+    );
+
+    if (result.found && result.notebook) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `✅ Knowledge Base Found!
+
+📓 Notebook: ${result.notebook.name}
+📚 Sources: ${result.notebook.sources.length} documents
+
+📝 Context Summary:
+${result.answer || 'Context loaded successfully'}
+
+📌 Citations:
+${result.citations?.map(c => `  • ${c}`).join('\n') || 'Full citations available in specs'}
+
+🎯 NEXT STEP:
+Call "start_project" to use this grounded context for spec generation.
+Your specs will include citation-backed requirements!`,
+          },
+        ],
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `📚 No NotebookLM Context Found
+
+Searched for: "${project_name}"
+Keywords: ${keywords.length > 0 ? keywords.join(', ') : 'none'}
+
+💡 Suggestions:
+${result.suggestedSources?.map(s => `  • ${s}`).join('\n') || '  • Create a NotebookLM notebook with relevant docs'}
+
+🔄 Available Options:
+1. Create a NotebookLM notebook with project docs and try again
+2. Proceed with AI-generated specs (call "start_project")
+
+Do you want to proceed without NotebookLM context?`,
+        },
+      ],
+    };
+  }
+
+  /**
+   * Generate A2UI blueprint for cross-platform UI
+   */
+  private async generateUIBlueprint(args: any) {
+    const { project_name, platform, screens } = args;
+
+    console.log(`\n🎨 Generating A2UI Blueprint for "${project_name}" (${platform})`);
+
+    // Convert screens to UIScreen format
+    const uiScreens: UIScreen[] = screens.map((s: any) => ({
+      name: s.name,
+      route: s.route || `/${s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      description: s.description || s.name,
+      components: s.components || ['Container', 'Text', 'Button'],
+      dataRequirements: s.dataRequirements || [],
+    }));
+
+    // Generate blueprint
+    const blueprint = a2uiGenerator.generateBlueprint(
+      project_name,
+      platform as A2UIPlatform,
+      uiScreens
+    );
+
+    // Generate code for the platform
+    let generatedCode = '';
+    if (platform === 'react' || platform === 'react-native' || platform === 'web') {
+      generatedCode = a2uiGenerator.toReactCode(blueprint);
+    } else if (platform === 'flutter') {
+      generatedCode = a2uiGenerator.toFlutterCode(blueprint);
+    }
+
+    // Save blueprint to project
+    const projectPath = `C:\\Users\\serha\\OneDrive\\Desktop\\devforge-projects\\${project_name}`;
+    const blueprintPath = `${projectPath}\\a2ui\\blueprint.json`;
+    const jsonlPath = `${projectPath}\\a2ui\\messages.jsonl`;
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `✅ A2UI Blueprint Generated!
+
+🎨 Project: ${project_name}
+📱 Platform: ${platform}
+📐 Screens: ${screens.length}
+
+🧩 Components Used:
+${blueprint.catalog.slice(0, 10).map(c => `  • ${c}`).join('\n')}
+${blueprint.catalog.length > 10 ? `  ... and ${blueprint.catalog.length - 10} more` : ''}
+
+📄 Generated Files:
+  • Blueprint JSON: ${blueprintPath}
+  • JSONL Messages: ${jsonlPath}
+
+🔧 Platform-Specific Code:
+\`\`\`${platform === 'flutter' ? 'dart' : 'tsx'}
+${generatedCode.substring(0, 500)}${generatedCode.length > 500 ? '\n// ... (truncated)' : ''}
+\`\`\`
+
+📊 Blueprint Summary:
+${JSON.stringify({
+            version: blueprint.version,
+            platform: blueprint.platform,
+            surfaceCount: blueprint.surfaces.length,
+            totalComponents: blueprint.surfaces.reduce((sum, s) => sum + s.components.length, 0),
+          }, null, 2)}
+
+🎯 NEXT STEPS:
+1. Review the generated blueprint
+2. Use the JSONL messages for streaming UI render
+3. Customize components as needed
+4. Integrate with your ${platform} project
+
+💡 Tip: A2UI blueprints are framework-agnostic.
+   You can render the same blueprint on any supported platform!`,
+        },
+      ],
+    };
+  }
+
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error("DevForge MCP Server running on stdio");
+    console.error("DevForge MCP Server v3.0 running on stdio");
     console.error("Ready for complete project workflow! 🚀");
   }
 }

@@ -1,6 +1,6 @@
 # DevForge MCP Server
 
-**DevForge** is an AI Software Factory that automatically creates complete project structures from ideas. It's an MCP (Model Context Protocol) server that integrates with Claude to provide powerful project generation and management capabilities.
+**DevForge** is an AI Software Factory that automatically creates complete project structures from ideas. It's an MCP (Model Context Protocol) server that integrates with **Claude Code** to provide powerful project generation and management capabilities.
 
 ## Features
 
@@ -125,38 +125,71 @@ Add new features to existing projects.
 - `feature_name` (string, required): Feature description
 - `implementation_notes` (string, optional): Additional details
 
-## Configuration with Claude Desktop
+## Configuration
 
-Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+DevForge MCP works with both:
+- **Claude Desktop** app (Chat + Code tabs)
+- **Standalone Claude Code**
+
+### Quick Setup
+
+1. **Build the project:**
+```bash
+npm run build
+```
+
+2. **Configure .env file:**
+Create a `.env` file with your API key:
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+3. **Add MCP Configuration:**
+
+#### For Claude Desktop App (Chat + Code tabs)
+
+Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "devforge": {
       "command": "node",
-      "args": [
-        "C:\\Users\\serha\\OneDrive\\Desktop\\devforge-mcp-server\\build\\index.js"
-      ]
+      "args": ["d:\\AI-Tools\\devforge-mcp-server\\build\\index.js"],
+      "env": {
+        "AI_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY_HERE"
+      }
     }
   }
 }
 ```
 
-Or for development:
+#### For Standalone Claude Code
+
+Edit `%USERPROFILE%\.claude\mcp.json` or use `claude mcp add devforge`:
 
 ```json
 {
   "mcpServers": {
     "devforge": {
-      "command": "npx",
-      "args": [
-        "tsx",
-        "C:\\Users\\serha\\OneDrive\\Desktop\\devforge-mcp-server\\src\\index.ts"
-      ]
+      "command": "node",
+      "args": ["d:\\AI-Tools\\devforge-mcp-server\\build\\index.js"],
+      "env": {
+        "AI_PROVIDER": "gemini",
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY_HERE"
+      }
     }
   }
 }
 ```
+
+**Alternative providers:**
+- For Claude: Set `AI_PROVIDER=claude` and use `ANTHROPIC_API_KEY`
+- For OpenAI: Set `AI_PROVIDER=openai` and use `OPENAI_API_KEY`
+
+For detailed configuration options, see [CLAUDE_CODE_CONFIG.md](./CLAUDE_CODE_CONFIG.md)
 
 ## Project Structure
 
